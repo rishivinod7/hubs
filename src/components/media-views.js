@@ -504,11 +504,6 @@ AFRAME.registerComponent("media-video", {
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
-
-    // Make sure that the audio is initialized to the right place.
-    // Its matrix may not update if this element is not visible.
-    // See https://github.com/mozilla/hubs/issues/2855
-    this.audio.updateMatrixWorld();
   },
 
   setPositionalAudioProperties() {
@@ -897,14 +892,18 @@ AFRAME.registerComponent("media-video", {
       if (this.audio) {
         if (window.APP.store.state.preferences.audioOutputMode === "audio") {
           this.el.object3D.getWorldPosition(positionA);
-          this.el.sceneEl.audioListener.getWorldPosition(positionB);
+          this.el.sceneEl.camera.getWorldPosition(positionB);
           const distance = positionA.distanceTo(positionB);
+          const pref = window.APP.store.state.preferences.globalRolloffFactor;
+          const globalRolloffFactor = pref !== undefined ? pref : 1.0;
           this.distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, distance * distance));
           const globalMediaVolume =
             window.APP.store.state.preferences.globalMediaVolume !== undefined
               ? window.APP.store.state.preferences.globalMediaVolume
               : 100;
-          this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume * this.distanceBasedAttenuation;
+          // Clamp globalRolloffFactor to [0.0, 1.0]
+          this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume
+            * (1.0 + Math.max(0.0, Math.min(1.0, globalRolloffFactor)) * (this.distanceBasedAttenuation - 1.0));
         }
       }
     };

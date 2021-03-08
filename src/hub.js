@@ -194,6 +194,7 @@ import "./components/owned-object-cleanup-timeout";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
+import "./components/networked-audio-analyser"; //added
 import "./components/event-repeater";
 import "./components/set-yxz-order";
 

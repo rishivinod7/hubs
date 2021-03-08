@@ -65,7 +65,7 @@ class AudioNormalizer {
 
   connect() {
     // Hacks. THREE.Audio connects audio nodes when source is set.
-    // If audio is not played yet, THREE.Audio.setFilters() doesn't
+    // If audio has not played yet, THREE.Audio.setFilters() doesn't
     // reset connections. Then manually caling .connect()/disconnect() here.
     // This might be a bug of Three.js and should be fixed in Three.js side?
     if (this.audio.source && !this.audio.isPlaying) {
@@ -110,7 +110,6 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.update = this.update.bind(this);
     this.normalizer = null;
     window.APP.store.addEventListener("statechanged", this.update);
-
     this.updateVolumeLabel();
   },
   remove() {
@@ -133,6 +132,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   update: (function() {
+    console.log("update of avatar vol controls triggered due to state change");
     const positionA = new THREE.Vector3();
     const positionB = new THREE.Vector3();
     return function update() {
@@ -155,14 +155,34 @@ AFRAME.registerComponent("avatar-volume-controls", {
 
       this.normalizer.apply();
 
-      const { audioOutputMode, globalVoiceVolume } = window.APP.store.state.preferences;
+      // const { audioOutputMode, globalVoiceVolume } = window.APP.store.state.preferences;
+      const { audioOutputMode, globalVoiceVolume, globalRolloffFactor } = window.APP.store.state.preferences;
       const volumeModifier = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
       let gain = volumeModifier * this.data.volume;
+      let gainwomega = volumeModifier * this.data.volume;
+      // console.log("DB: Final gain: " + gain);
       if (audioOutputMode === "audio") {
         this.avatarAudioSource.el.object3D.getWorldPosition(positionA);
         this.el.sceneEl.audioListener.getWorldPosition(positionB);
         const squaredDistance = positionA.distanceToSquared(positionB);
-        gain = gain * Math.min(1, 10 / Math.max(1, squaredDistance));
+        const distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, squaredDistance));
+        // Clamp globalRolloffFactor to [0.0, 1.0]
+        gain = gain * (1.0 + Math.max(0.0, Math.min(1.0, globalRolloffFactor)) * (distanceBasedAttenuation - 1.0));
+        gainwomega =
+          gain * (1.0 + Math.max(0.0, Math.min(1.0, globalRolloffFactor)) * (distanceBasedAttenuation - 1.0));
+        
+        console.log("DB: gain without megaphone: " + gainwomega);
+        console.log("DB: distance: " + positionA.distanceTo(positionB));
+        console.log("DB: squared distance: " + positionA.distanceToSquared(positionB));
+        console.log("DB: distance based attenuation: " + positionA.distanceToSquared(positionB));
+        console.log("DB: distanceBasedAttenuation - 1.0: " + (distanceBasedAttenuation - 1.0));
+        console.log("DB: globalRolloffFactor: " + globalRolloffFactor);
+        console.log("DB: volumeModifier: " + volumeModifier);
+        console.log("DB: this.data.volume: " + this.data.volume);
+        console.log("DB: window.APP.hubChannel.presence:");
+        // console.log(window.APP.hubChannel.presence);
+        // window.APP.hubChannel.sendMessage("Final gain: " + gain);
+        // this.log("final volume: " + this.data.volume);
       }
 
       audio.gain.gain.value = gain;

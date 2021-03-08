@@ -68,7 +68,6 @@ export default class MessageDispatch extends EventTarget {
           }
         }
         break;
- 
         case "audioRolloff":
           if (args.length === 1) {
             const factor = Number(args[0]);
@@ -112,7 +111,92 @@ export default class MessageDispatch extends EventTarget {
           this.log(`distanceModel command needs a string input that is either linear, inverse or exponential. Your input was ${type}. Inverse is default.`);
         }
         break;
-        
+        case "audioRolloff":
+          if (args.length === 1) {
+            const factor = Number(args[0]);
+            console.log("DB: Updating window.APP.store to " + factor);
+            if (!isNaN(factor)) {
+              console.log("DB: is a number - so Updating window.APP.store.globalRolloffFactor to " + factor);
+              window.APP.store.update({
+                // Factor must be equal to or greater than 0.0
+                preferences: { globalRolloffFactor: Math.max(0.0, factor) }
+              });
+          
+              const isGlobalAudioRollOffEnabled = window.APP.store.state.preferences.globalRolloffFactor > 0;
+              this.log(
+                `Global audio rolloff  ${
+                  isGlobalAudioRollOffEnabled
+                    ? "set to " + window.APP.store.state.preferences.globalRolloffFactor
+                    : "disabled"
+                }.`
+              );
+            } else {
+              this.log("audioRolloff command needs a valid number parameter.");
+            }
+          } else {
+            this.log("audioRolloff command needs one parameter.");
+          }
+          break;
+      case "distanceModel": //added
+        if (typeof args[0] === 'string') {
+          const model = args[0];
+          var type = typeof args[0];
+          if (model === "linear" || model === "inverse" || model === "exponential") {
+            // Model must be one of the above
+            window.APP.store.update({
+              preferences: { globalDistanceModel: model }
+            });
+            this.log(`Avatar distanceModel is set to ${model}. `);
+          } else {
+            this.log("distanceModel command needs a parameter that is either linear, inverse or exponential.");
+          }
+        } else {
+          this.log(`distanceModel command needs a string input that is either linear, inverse or exponential. Your input was ${type}. Inverse is default.`);
+        }
+        break;
+        case "audioRolloff":
+          if (args.length === 1) {
+            const factor = Number(args[0]);
+            console.log("DB: Updating window.APP.store to " + factor);
+            if (!isNaN(factor)) {
+              console.log("DB: is a number - so Updating window.APP.store.globalRolloffFactor to " + factor);
+              window.APP.store.update({
+                // Factor must be equal to or greater than 0.0
+                preferences: { globalRolloffFactor: Math.max(0.0, factor) }
+              });
+          
+              const isGlobalAudioRollOffEnabled = window.APP.store.state.preferences.globalRolloffFactor > 0;
+              this.log(
+                `Global audio rolloff  ${
+                  isGlobalAudioRollOffEnabled
+                    ? "set to " + window.APP.store.state.preferences.globalRolloffFactor
+                    : "disabled"
+                }.`
+              );
+            } else {
+              this.log("audioRolloff command needs a valid number parameter.");
+            }
+          } else {
+            this.log("audioRolloff command needs one parameter.");
+          }
+          break;
+      case "distanceModel": //added
+        if (typeof args[0] === 'string') {
+          const model = args[0];
+          var type = typeof args[0];
+          if (model === "linear" || model === "inverse" || model === "exponential") {
+            // Model must be one of the above
+            window.APP.store.update({
+              preferences: { globalDistanceModel: model }
+            });
+            this.log(`Avatar distanceModel is set to ${model}. `);
+          } else {
+            this.log("distanceModel command needs a parameter that is either linear, inverse or exponential.");
+          }
+        } else {
+          this.log(`distanceModel command needs a string input that is either linear, inverse or exponential. Your input was ${type}. Inverse is default.`);
+        }
+        break;
       case "grow":
         for (let i = 0; i < scales.length; i++) {
           if (scales[i] > curScale.x) {
@@ -140,6 +224,15 @@ export default class MessageDispatch extends EventTarget {
       case "leave":
         this.entryManager.exitScene();
         this.remountUI({ roomUnavailableReason: ExitReason.left });
+        break;
+      case "log":
+        this.log(this.scene.systems["hubs-systems"].audioSettingsSystem.toLog());
+        break;
+      case "log":
+        this.log(this.scene.systems["hubs-systems"].audioSettingsSystem.toLog());
+        break;
+      case "log":
+        this.log(this.scene.systems["hubs-systems"].audioSettingsSystem.toLog());
         break;
       case "log":
         this.log(this.scene.systems["hubs-systems"].audioSettingsSystem.toLog());
@@ -213,7 +306,10 @@ export default class MessageDispatch extends EventTarget {
           );
         }
         break;
-
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
       case "audioNormalization":
         {
           if (args.length === 1) {
@@ -236,7 +332,14 @@ export default class MessageDispatch extends EventTarget {
           }
         }
         break;
-
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     }
   };
 }

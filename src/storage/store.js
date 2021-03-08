@@ -111,6 +111,8 @@ export const SCHEMA = {
         maxResolutionHeight: { type: "number" },
         globalVoiceVolume: { type: "number" },
         globalMediaVolume: { type: "number" },
+        globalRolloffFactor: { type: "number" },// added
+        globalDistanceModel: { type: "string"}, //added
         snapRotationDegrees: { type: "number" },
         materialQualitySetting: { type: "string" },
         enableDynamicShadows: { type: "bool" },
